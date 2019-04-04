@@ -19,6 +19,12 @@ defmodule DivvyReactChallengeWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/", DivvyReactChallengeWeb do
+    pipe_through :api
+
+    get "/getItemId", CoordinateController, :index
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", DivvyReactChallengeWeb do
   #   pipe_through :api
