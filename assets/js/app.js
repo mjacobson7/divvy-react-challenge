@@ -1,30 +1,44 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import axios from 'axios';
+import Header from './header';
+import Result from './result';
+import Input from './input';
 
 class App extends React.Component {
 
     state = {
-        x: '',
-        y: '',
-        itemId: '-'
+        itemId: '-',
+        xProperties: {
+            label: 'X',
+            name: 'x',
+            value: ''
+        },
+        yProperties: {
+            label: 'Y',
+            name: 'y',
+            value: ''
+        }
     }
 
-    handleXInputChange(value) {
-        this.setState({ x: value }, () => {
-            this.getItemId();
-        });
-    }
 
-    handleYInputChange(value) {
-        this.setState({ y: value }, () => {
+
+    handleInputChange(data) {
+        this.setState(prevState => ({
+            [`${[data.type]}Properties`]: {
+                ...prevState[`${[data.type]}Properties`],
+                value: data.value
+            }
+        }), () => {
             this.getItemId();
-        });
+        })
+
     }
 
     getItemId() {
-        if (null != this.state.x && null != this.state.y && this.state.x > 0 && this.state.y > 0) {
-            axios.get('/getItemId', { params: { x: this.state.x, y: this.state.y } }).then(retVal => {
+
+        if ('' !== this.state.xProperties.value && '' !== this.state.yProperties.value) {
+            axios.get('/getItemId', { params: { x: this.state.xProperties.value, y: this.state.yProperties.value } }).then(retVal => {
                 this.setState({ itemId: retVal.data })
             })
         } else {
@@ -32,49 +46,29 @@ class App extends React.Component {
         }
     }
 
-
     render() {
 
         return (
             <div className="container-fluid">
-                <div className="py-5 text-center">
-                    <img className="d-block mx-auto mb-4" src="https://getdivvy.com/wp-content/themes/divvy-child/images/Divvy-Logo-Teal.png" alt="Logo" width="181" />
-                    <h2>Warehouse Item Locator</h2>
-                    <p className="lead">Please enter the X and Y coordinates for your item</p>
-                </div>
+                <Header></Header>
 
                 <div className="col-12">
                     <div className="row mb-5" style={{ justifyContent: 'center' }}>
                         <div className="col-sm-12 col-lg-4 mb-3">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text">X</span>
-                                </div>
-                                <input value={this.state.x} onChange={e => this.handleXInputChange(e.target.value)} type="number" className="form-control" max="100000" min="0" required />
-                                <div className="invalid-feedback" style={{ width: '100%' }}>
-                                    The x coordinate required.
-                                    </div>
-                            </div>
+                            <Input
+                                properties={this.state.xProperties}
+                                handleInputChange={this.handleInputChange = this.handleInputChange.bind(this)}>
+                            </Input>
                         </div>
                         <div className="col-sm-12 col-lg-4 mb-3">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text">Y</span>
-                                </div>
-                                <input value={this.state.y} onChange={e => this.handleYInputChange(e.target.value)} type="number" className="form-control" max="100000" min="0" required />
-                                <div className="invalid-feedback" style={{ width: '100%' }}>
-                                    The Y coordinate is required.
-                                    </div>
-                            </div>
+                            <Input
+                                properties={this.state.yProperties}
+                                handleInputChange={this.handleInputChange = this.handleInputChange.bind(this)}>
+                            </Input>
                         </div>
                     </div>
 
-                    <div className="row" style={{ justifyContent: 'center' }}>
-                        <div className="card" style={{width: '25rem'}}>
-                            <div className="card-header">Result</div>
-                            {<h1 style={{ textAlign: 'center' }}>{this.state.itemId}</h1>}
-                        </div>
-                    </div>
+                    <Result itemId={this.state.itemId}></Result>
                 </div>
             </div>
         )
